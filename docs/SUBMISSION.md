@@ -49,7 +49,7 @@ It gives emergency responders, land managers and scientists in Nigeria a consist
 ## Use of Super Intelligence (SI)
 Yes. We used an AI coding assistant (Claude Code) to help write the data pipeline, the web application code and drafts of the documentation.
 The challenge choice, the solution concept (a harmonized burning calendar for Nigeria with critical periods and early warning) and the review of every scientific choice were done by the team.
-This is stated in the app footer and in the README. No AI-generated images are used in the project.
+This is stated in the README and in the source-code headers. No AI-generated images are used in the project.
 
 ## NASA Data
 - **FIRMS MODIS Collection 6.1 active fire product** (Terra and Aqua), yearly country archive for Nigeria 2000–2025, plus near-real-time data for the last 7 days.

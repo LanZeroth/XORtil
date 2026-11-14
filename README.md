@@ -42,4 +42,4 @@ NASA FIRMS active-fire hotspots: MODIS C6.1 (Terra, Aqua) and VIIRS 375 m (Suomi
 
 ## AI disclosure
 The code and documentation in this repository were written with the help of an AI coding assistant (Claude Code).
-The challenge choice, the solution idea and the review of all scientific choices are the team's own. The app shows this disclosure in its footer.
+The challenge choice, the solution idea and the review of all scientific choices are the team's own.
