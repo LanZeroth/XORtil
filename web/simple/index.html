@@ -59,6 +59,14 @@
   .lvl-above .badge { background: var(--orange-bg); color: var(--orange); }
   .lvl-extreme .badge { background: var(--red-bg); color: var(--red); }
   .lvl-extreme { border-color: var(--red); } .lvl-above { border-color: var(--orange); }
+  .yrs-title { font-size: 16px; font-weight: 600; margin: 18px 0 8px; }
+  .yrs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .yr { font-size: 14px; font-weight: 600; padding: 5px 10px; border-radius: 999px; border: 1.5px solid var(--line); color: var(--muted); background: transparent; font-variant-numeric: tabular-nums; }
+  .yr.less { background: var(--fire); border-color: var(--fire); color: #fff; }
+  .yrs-key { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--muted); margin-top: 10px; }
+  .yrs-key span { display: inline-flex; align-items: center; gap: 6px; }
+  .yrs-key i { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid var(--line); display: inline-block; }
+  .yrs-key i.less { background: var(--fire); border-color: var(--fire); }
   .season-alert { margin-top: 14px; padding: 12px 14px; border-radius: 14px; background: var(--fire-soft); font-size: 17px; }
 
   .months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; align-items: end; height: 170px; margin: 18px 0 6px; }
@@ -178,6 +186,15 @@ function render(key) {
   const crit = criticalPeriod(clim);
   const ns = nowStatus(h, tl, crit);
   const L = LEVELS[ns.level];
+  // same 7-day window in each past year, 2003-2022
+  const wsum = (a, b) => { let t = 0; for (let i = Math.max(0, a); i <= b; i++) t += h[i]; return t; };
+  const nowSum = wsum(ns.end - 6, ns.end), nd = tl.date(ns.end);
+  const past = [];
+  for (let y = 2003; y <= 2022; y++) {
+    const j = tl.index(y, nd.getUTCMonth(), nd.getUTCDate());
+    if (j - 6 >= 0 && j < tl.n) past.push({ y, less: wsum(j - 6, j) < nowSum });
+  }
+  const nLess = past.filter(p => p.less).length;
   const SAY = {
     extreme: "There is <b>much more</b> burning this week than we normally see at this time of the year.",
     above: "There is <b>more</b> burning this week than we normally see at this time of the year.",
@@ -218,6 +235,9 @@ function render(key) {
     <div class="badge">${L.text}</div>
     <p class="lead">${SAY[ns.level]}</p>
     <p class="small">Based on satellite records up to ${endDate}.</p>
+    <p class="yrs-title">This same week in past years (${nLess} of ${past.length} had less burning than now)</p>
+    <div class="yrs">${past.map(p => `<span class="yr ${p.less ? "less" : ""}" title="${p.y}: ${p.less ? "less" : "more"} burning than this week">${p.y}</span>`).join("")}</div>
+    <div class="yrs-key"><span><i class="less"></i>Less burning than this week</span><span><i></i>More burning than this week</span></div>
     <div class="season-alert">${seasonLine}</div>
   </section>
 
