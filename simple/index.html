@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Harmattan Fire Check</title>
+<meta name="description" content="Simple fire check for Nigeria: is fire risk high this week, when is fire season in your state, and is it getting better or worse. Built from NASA satellite data." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23fff4e8'/%3E%3Cpath d='M16 5c3 5 7 7 7 13a7 7 0 0 1-14 0c0-3 2-5 3-7 0 3 1 4 2 4 0-4 0-7 2-10z' fill='%23e8590c'/%3E%3C/svg%3E" />
+<style>
+  :root {
+    --bg: #fbf7f2; --card: #ffffff; --ink: #1f1a17; --muted: #6b625b; --line: #ece4da;
+    --fire: #e8590c; --fire-soft: #ffe8d6; --gold: #f59f00;
+    --green: #2b8a3e; --green-bg: #e6f6ea; --yellow: #a07800; --yellow-bg: #fff6d6;
+    --orange: #d9480f; --orange-bg: #ffe8d9; --red: #c92a2a; --red-bg: #ffe3e3;
+    --radius: 20px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14110f; --card: #1e1a17; --ink: #f4eee8; --muted: #b3a89f; --line: #322b26;
+      --fire-soft: #3a2416; --green-bg: #15301d; --yellow-bg: #332a0d; --orange-bg: #3a2010; --red-bg: #3d1717;
+      --green: #69db7c; --yellow: #ffd43b; --orange: #ff922b; --red: #ff6b6b;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: Inter, system-ui, sans-serif; overflow-x: hidden; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px 40px; }
+  header { padding: 28px 0 10px; text-align: center; }
+  .logo { font-family: "Space Grotesk"; font-weight: 700; font-size: 34px; letter-spacing: .02em; display: inline-flex; align-items: center; gap: 10px; }
+  .logo .flame { font-size: 34px; animation: flick 2.4s ease-in-out infinite; display: inline-block; }
+  @keyframes flick { 50% { transform: scale(1.12) rotate(-4deg); } }
+  header p { color: var(--muted); font-size: 17px; margin: 6px 0 0; }
+
+  .pick { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin: 18px 0; box-shadow: 0 6px 24px rgba(80,40,10,.06); }
+  .pick label { display: block; font-weight: 600; font-size: 18px; margin-bottom: 10px; }
+  .pick-row { display: flex; gap: 10px; flex-wrap: wrap; }
+  select, .btn { font: inherit; font-size: 18px; border-radius: 14px; padding: 14px 16px; border: 2px solid var(--line); background: var(--bg); color: var(--ink); }
+  select { flex: 1 1 260px; min-width: 0; cursor: pointer; }
+  select:focus, .btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .btn { cursor: pointer; background: var(--fire); color: #fff; border-color: var(--fire); font-weight: 600; flex: 0 0 auto; }
+  .btn:hover { filter: brightness(1.05); }
+  .loc-msg { color: var(--muted); font-size: 15px; margin: 10px 0 0; min-height: 1em; }
+
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; margin: 16px 0; box-shadow: 0 6px 24px rgba(80,40,10,.06); animation: up .5s ease both; }
+  @keyframes up { from { opacity: 0; transform: translateY(10px); } }
+  .q { font-size: 15px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+  .q .num { background: var(--fire); color: #fff; width: 24px; height: 24px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 13px; letter-spacing: 0; }
+  h2 { font-family: "Space Grotesk"; font-size: 30px; line-height: 1.15; margin: 0 0 8px; }
+  .lead { font-size: 18px; line-height: 1.55; margin: 0; }
+  .small { font-size: 14px; color: var(--muted); margin: 12px 0 0; line-height: 1.5; }
+
+  .status { border-width: 2px; }
+  .status .badge { display: inline-flex; align-items: center; gap: 10px; font-family: "Space Grotesk"; font-weight: 700; font-size: 28px; padding: 10px 18px; border-radius: 16px; margin: 4px 0 12px; }
+  .lvl-below .badge { background: var(--green-bg); color: var(--green); }
+  .lvl-normal .badge { background: var(--yellow-bg); color: var(--yellow); }
+  .lvl-above .badge { background: var(--orange-bg); color: var(--orange); }
+  .lvl-extreme .badge { background: var(--red-bg); color: var(--red); }
+  .lvl-extreme { border-color: var(--red); } .lvl-above { border-color: var(--orange); }
+  .dots { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 4px; }
+  .dots i { width: 22px; height: 22px; border-radius: 6px; background: var(--line); display: block; }
+  .dots i.on { background: var(--fire); }
+  .season-alert { margin-top: 14px; padding: 12px 14px; border-radius: 14px; background: var(--fire-soft); font-size: 17px; }
+
+  .months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; align-items: end; height: 170px; margin: 18px 0 6px; }
+  .months .bar { background: var(--line); border-radius: 8px 8px 4px 4px; position: relative; min-height: 4px; transition: height .7s cubic-bezier(.2,.8,.2,1); }
+  .months .bar.hot { background: linear-gradient(180deg, var(--gold), var(--fire)); }
+  .mlabels { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; text-align: center; font-size: 13px; color: var(--muted); }
+  .mlabels b { color: var(--fire); }
+  .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 14px; color: var(--muted); margin-top: 10px; }
+  .legend i { display: inline-block; width: 14px; height: 14px; border-radius: 4px; vertical-align: -2px; margin-right: 6px; }
+
+  .years { display: flex; gap: 3px; align-items: end; height: 130px; margin: 18px 0 6px; }
+  .years .bar { flex: 1; background: var(--fire); opacity: .85; border-radius: 4px 4px 2px 2px; min-height: 3px; transition: height .7s cubic-bezier(.2,.8,.2,1); }
+  .years .bar.recent { background: var(--gold); opacity: 1; }
+  .ylabels { display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .trend { font-size: 22px; font-weight: 600; }
+  .trend.down { color: var(--green); } .trend.up { color: var(--red); }
+
+  #map { height: 340px; border-radius: 14px; overflow: hidden; margin-top: 14px; border: 1px solid var(--line); }
+  .count { font-family: "Space Grotesk"; font-size: 44px; font-weight: 700; color: var(--fire); line-height: 1; }
+
+  .tips { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .tip { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 14px; font-size: 16px; line-height: 1.45; }
+  .tip span { font-size: 26px; display: block; margin-bottom: 4px; }
+
+  footer { text-align: center; color: var(--muted); font-size: 14px; line-height: 1.6; padding: 20px 0; }
+  footer a { color: var(--fire); }
+  .loading { text-align: center; padding: 40px; color: var(--muted); font-size: 18px; }
+  @media (max-width: 560px) {
+    h2 { font-size: 25px; } .tips { grid-template-columns: 1fr; }
+    .mlabels { font-size: 11px; } .months { gap: 3px; } .mlabels { gap: 3px; }
+    .status .badge { font-size: 23px; }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><span class="flame" aria-hidden="true">🔥</span>Harmattan</div>
+    <p>A simple fire check for Nigeria, from 25 years of NASA satellite pictures</p>
+  </header>
+
+  <section class="pick" aria-label="Choose your area">
+    <label for="place">Where do you live?</label>
+    <div class="pick-row">
+      <select id="place"><option>Loading…</option></select>
+      <button class="btn" id="locate" type="button">📍 Use my location</button>
+    </div>
+    <p class="loc-msg" id="locMsg"></p>
+  </section>
+
+  <div id="out"><div class="loading">Loading 25 years of fire data…</div></div>
+
+  <footer>
+    Fire data: NASA FIRMS satellites (MODIS and VIIRS), 2000 to today. Map tiles © Esri and OpenStreetMap contributors. State borders: geoBoundaries.<br />
+    In an emergency in Nigeria, call <b>112</b>.<br />
+    Want the full charts? <a href="../">Open the detailed version</a> · Team XORTil
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+<script type="module">
+import { Timeline, densify, climatology, criticalPeriod, fdoyLabel, annualAnomalies, nowStatus, monthlyTotals, MONTHS } from "../js/analytics.js";
+
+const $ = s => document.querySelector(s);
+const get = f => fetch(`../data/${f}`).then(r => { if (!r.ok) throw new Error(f); return r.json(); });
+let D, tl, map;
+
+/* ---------- point-in-polygon for "use my location" and counting fires ---------- */
+function inRing(x, y, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const [xi, yi] = ring[i], [xj, yj] = ring[j];
+    if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) inside = !inside;
+  }
+  return inside;
+}
+function inGeom(x, y, g) {
+  const polys = g.type === "Polygon" ? [g.coordinates] : g.coordinates;
+  return polys.some(p => inRing(x, y, p[0]) && !p.slice(1).some(h => inRing(x, y, h)));
+}
+function bbox(g) {
+  let a = 180, b = 90, c = -180, d = -90;
+  const walk = q => typeof q[0] === "number" ? (a = Math.min(a, q[0]), c = Math.max(c, q[0]), b = Math.min(b, q[1]), d = Math.max(d, q[1])) : q.forEach(walk);
+  walk(g.coordinates); return [[a, b], [c, d]];
+}
+
+/* ---------- build the answers for one area ---------- */
+function seriesFor(key) {
+  let h;
+  if (key === "nga") h = Float32Array.from(D.national.h);
+  else { const s = D.states.series[key]; h = s ? densify(s.h, tl.n) : new Float32Array(tl.n); }
+  for (let i = 0; i < tl.n; i++) if (tl.isMissing(i)) h[i] = 0;
+  return h;
+}
+
+const LEVELS = {
+  below:   { icon: "🟢", text: "Less fire than usual" },
+  normal:  { icon: "🟡", text: "About normal" },
+  above:   { icon: "🟠", text: "More fire than usual" },
+  extreme: { icon: "🔴", text: "Much more fire than usual" },
+};
+
+function render(key) {
+  const name = key === "nga" ? "Nigeria" : D.states.names[+key];
+  const where = key === "nga" ? "Nigeria" : /Territory|State$/.test(name) ? name : `${name} State`;
+  const h = seriesFor(key);
+  const clim = climatology(h, tl);
+  const crit = criticalPeriod(clim);
+  const ns = nowStatus(h, tl, crit);
+  const L = LEVELS[ns.level];
+  const of20 = Math.round(ns.pct / 100 * 20);
+  const endDate = tl.fmt(ns.end);
+
+  // monthly averages over 2003-2022
+  const mt = monthlyTotals(h, tl);
+  const avg = MONTHS.map((_, m) => { let s = 0, c = 0; for (let y = 2003; y <= 2022; y++) { const v = mt.get((y - 2000) * 12 + m); if (v != null) { s += v; c++; } } return c ? s / c : 0; });
+  const mmax = Math.max(...avg) || 1;
+  const hotMonth = m => avg[m] >= 0.35 * mmax;
+  const top = avg.indexOf(mmax);
+
+  // yearly seasons + trend
+  const rows = annualAnomalies(h, tl).rows.filter(r => r.complete && r.fy >= 2001);
+  const ymax = Math.max(...rows.map(r => r.total)) || 1;
+  const early = rows.filter(r => r.fy >= 2003 && r.fy <= 2007), late = rows.slice(-5);
+  const mean = a => a.reduce((s, r) => s + r.total, 0) / Math.max(1, a.length);
+  const change = Math.round(100 * (mean(late) / (mean(early) || 1) - 1));
+  const trendWord = change <= -5 ? `about <b>${-change}% fewer</b> fires` : change >= 5 ? `about <b>${change}% more</b> fires` : "<b>about the same</b> amount of fire";
+  const trendCls = change <= -5 ? "down" : change >= 5 ? "up" : "";
+
+  // fires this week inside the area
+  const feat = key === "nga" ? null : D.geo.features.find(f => String(f.id) === key);
+  const pts = D.recent.features.filter(f => !feat || inGeom(f.geometry.coordinates[0], f.geometry.coordinates[1], feat.geometry));
+
+  const seasonLine = ns.inCrit
+    ? `🔥 <b>It is fire season now</b> in ${name}, until about <b>${fdoyLabel(crit.end)}</b>. Take extra care.`
+    : `📅 Fire season in ${name} starts in about <b>${ns.daysToCrit} days</b> (around <b>${fdoyLabel(crit.start)}</b>). Now is a good time to prepare.`;
+
+  $("#out").innerHTML = `
+  <section class="card status lvl-${ns.level}" aria-live="polite">
+    <p class="q"><span class="num">1</span> Is fire high right now?</p>
+    <h2>This week in ${where}</h2>
+    <div class="badge">${L.icon} ${L.text}</div>
+    <p class="lead">In the past 7 days (up to ${endDate}), satellites saw <b>more fire than in ${of20} of the last 20 years</b> at this same time of year.</p>
+    <div class="dots" role="img" aria-label="${of20} out of 20 past years had less fire">${Array.from({ length: 20 }, (_, i) => `<i class="${i < of20 ? "on" : ""}"></i>`).join("")}</div>
+    <p class="small">Each square is one past year (2003–2022). Orange squares are years that had <b>less</b> fire than this week.</p>
+    <div class="season-alert">${seasonLine}</div>
+  </section>
+
+  <section class="card">
+    <p class="q"><span class="num">2</span> When is fire season?</p>
+    <h2>Most fires happen from ${fdoyLabel(crit.start)} to ${fdoyLabel(crit.end)}</h2>
+    <p class="lead">That's about <b>${Math.round(crit.length / 7)} weeks</b>, and it holds <b>${Math.round(crit.share * 100)}%</b> of all the fire in a year. The worst time is usually around <b>${fdoyLabel(crit.peak)}</b>.</p>
+    <div class="months" id="months">${avg.map((v, m) => `<div class="bar ${hotMonth(m) ? "hot" : ""}" style="height:0" data-h="${Math.max(3, 100 * v / mmax)}" title="${MONTHS[m]}"></div>`).join("")}</div>
+    <div class="mlabels">${MONTHS.map((n, m) => m === top ? `<b>${n}</b>` : `<span>${n}</span>`).join("")}</div>
+    <div class="legend"><span><i style="background:linear-gradient(180deg,var(--gold),var(--fire))"></i>Fire season months</span><span><i style="background:var(--line)"></i>Quieter months</span></div>
+    <p class="small">Average amount of fire in each month, 2003–2022. Taller means more fire.</p>
+  </section>
+
+  <section class="card">
+    <p class="q"><span class="num">3</span> Is it getting better or worse?</p>
+    <h2>Recent years had <span class="trend ${trendCls}">${trendWord.replace(/<\/?b>/g, "")}</span></h2>
+    <p class="lead">Compared with the mid-2000s, the last 5 fire seasons in ${name} had ${trendWord}.</p>
+    <div class="years" id="years">${rows.map((r, i) => `<div class="bar ${i >= rows.length - 5 ? "recent" : ""}" style="height:0" data-h="${Math.max(2, 100 * r.total / ymax)}" title="Fire season ${r.fy}/${String((r.fy + 1) % 100).padStart(2, "0")}"></div>`).join("")}</div>
+    <div class="ylabels"><span>${rows[0]?.fy ?? ""}</span><span>Each bar = one fire season (July–June)</span><span>${(rows.at(-1)?.fy ?? 0) + 1}</span></div>
+  </section>
+
+  <section class="card">
+    <p class="q"><span class="num">4</span> Where are the fires this week?</p>
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span class="count">${pts.length.toLocaleString("en-US")}</span><span class="lead">fire spots seen by satellite in ${where} in the last 7 days</span></div>
+    <div id="map" role="img" aria-label="Map of fire spots this week"></div>
+    <p class="small">Each orange dot is a fire spot seen from space. One large fire can show as several dots.</p>
+  </section>
+
+  <section class="card">
+    <p class="q"><span class="num">5</span> What can I do?</p>
+    <div class="tips">
+      <div class="tip"><span>🌾</span>Clear dry grass and leaves around homes, farms and stores before fire season.</div>
+      <div class="tip"><span>💨</span>Don't burn bush or rubbish on windy days. Harmattan wind spreads fire fast.</div>
+      <div class="tip"><span>🚧</span>Make firebreaks, which are strips of bare ground, around farms and villages.</div>
+      <div class="tip"><span>📞</span>See a fire spreading? Move away and call <b>112</b>.</div>
+    </div>
+  </section>`;
+
+  requestAnimationFrame(() => document.querySelectorAll(".months .bar, .years .bar").forEach(b => b.style.height = b.dataset.h + "%"));
+  drawMap(feat, pts);
+}
+
+function drawMap(feat, pts) {
+  if (map) map.remove();
+  map = new maplibregl.Map({
+    container: "map",
+    style: {
+      version: 8,
+      sources: { base: { type: "raster", tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"], tileSize: 256, maxzoom: 17, attribution: "Tiles © Esri, HERE, Garmin, © OpenStreetMap contributors" } },
+      layers: [{ id: "base", type: "raster", source: "base" }],
+    },
+    bounds: feat ? bbox(feat.geometry) : [[2.6, 4.2], [14.7, 13.9]], fitBoundsOptions: { padding: 24 },
+    attributionControl: { compact: true }, cooperativeGestures: true,
+  });
+  map.on("load", () => {
+    if (feat) {
+      map.addSource("area", { type: "geojson", data: feat });
+      map.addLayer({ id: "area-fill", type: "fill", source: "area", paint: { "fill-color": "#e8590c", "fill-opacity": 0.06 } });
+      map.addLayer({ id: "area-line", type: "line", source: "area", paint: { "line-color": "#e8590c", "line-width": 2.5 } });
+    }
+    map.addSource("fires", { type: "geojson", data: { type: "FeatureCollection", features: pts } });
+    map.addLayer({ id: "glow", type: "circle", source: "fires", paint: { "circle-radius": 7, "circle-color": "#ff922b", "circle-opacity": 0.25, "circle-blur": 0.8 } });
+    map.addLayer({ id: "dot", type: "circle", source: "fires", paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 2.2, 9, 4.5], "circle-color": "#e8590c", "circle-stroke-color": "#fff", "circle-stroke-width": 0.6 } });
+  });
+}
+
+/* ---------- start ---------- */
+(async () => {
+  try {
+    const [meta, national, states, recent, geo] = await Promise.all(["meta.json", "national.json", "states.json", "recent.geojson", "states.geojson"].map(get));
+    D = { meta, national, states, recent, geo };
+    tl = new Timeline(national.start, national.ndays, meta.missing);
+  } catch (e) {
+    $("#out").innerHTML = `<div class="loading">Sorry, the fire data could not load. Please refresh the page.</div>`; console.error(e); return;
+  }
+  const sel = $("#place");
+  const opts = D.states.names.map((n, i) => [String(i), n]).sort((a, b) => a[1].localeCompare(b[1]));
+  sel.innerHTML = `<option value="nga">All of Nigeria</option>` + opts.map(([v, n]) => `<option value="${v}">${n}</option>`).join("");
+  let saved = null; try { saved = localStorage.getItem("harmattan-place"); } catch {}
+  if (saved && [...sel.options].some(o => o.value === saved)) sel.value = saved;
+  sel.onchange = () => { try { localStorage.setItem("harmattan-place", sel.value); } catch {} render(sel.value); };
+  render(sel.value);
+
+  $("#locate").onclick = () => {
+    const msg = $("#locMsg");
+    if (!navigator.geolocation) { msg.textContent = "Your browser can't share location. Please choose your state from the list."; return; }
+    msg.textContent = "Finding your location…";
+    navigator.geolocation.getCurrentPosition(p => {
+      const { longitude: x, latitude: y } = p.coords;
+      const f = D.geo.features.find(f => inGeom(x, y, f.geometry));
+      if (!f) { msg.textContent = "You seem to be outside Nigeria. Showing all of Nigeria."; sel.value = "nga"; }
+      else { msg.textContent = `📍 You are in ${f.properties.name}.`; sel.value = String(f.id); }
+      sel.onchange();
+    }, () => { msg.textContent = "Location was not shared. Please choose your state from the list."; }, { timeout: 10000 });
+  };
+})();
+</script>
+</body>
+</html>
