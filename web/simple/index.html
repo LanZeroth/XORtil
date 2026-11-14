@@ -59,9 +59,6 @@
   .lvl-above .badge { background: var(--orange-bg); color: var(--orange); }
   .lvl-extreme .badge { background: var(--red-bg); color: var(--red); }
   .lvl-extreme { border-color: var(--red); } .lvl-above { border-color: var(--orange); }
-  .dots { display: flex; flex-wrap: wrap; gap: 6px; margin: 14px 0 4px; }
-  .dots i { width: 22px; height: 22px; border-radius: 6px; background: var(--line); display: block; }
-  .dots i.on { background: var(--fire); }
   .season-alert { margin-top: 14px; padding: 12px 14px; border-radius: 14px; background: var(--fire-soft); font-size: 17px; }
 
   .months { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; align-items: end; height: 170px; margin: 18px 0 6px; }
@@ -181,7 +178,12 @@ function render(key) {
   const crit = criticalPeriod(clim);
   const ns = nowStatus(h, tl, crit);
   const L = LEVELS[ns.level];
-  const of20 = Math.round(ns.pct / 100 * 20);
+  const SAY = {
+    extreme: "There is <b>much more</b> burning this week than we normally see at this time of the year.",
+    above: "There is <b>more</b> burning this week than we normally see at this time of the year.",
+    normal: "Burning this week is <b>about what we normally see</b> at this time of the year.",
+    below: "There is <b>less</b> burning this week than we normally see at this time of the year.",
+  };
   const endDate = ng(tl.fmt(ns.end));
 
   // monthly averages over 2003-2022
@@ -214,9 +216,8 @@ function render(key) {
     <p class="q"><span class="num">1</span> Is bush burning high this week?</p>
     <h2>This week in ${where}</h2>
     <div class="badge">${L.text}</div>
-    <p class="lead">In the last 7 days (up to ${endDate}), satellites recorded <b>more burning than in ${of20} of the 20 past years</b> (2003–2022) for the same week.</p>
-    <div class="dots" role="img" aria-label="${of20} out of 20 past years had less burning">${Array.from({ length: 20 }, (_, i) => `<i class="${i < of20 ? "on" : ""}"></i>`).join("")}</div>
-    <p class="small">Each box stands for one past year (2003–2022). Orange boxes are years that had <b>less</b> burning than this week.</p>
+    <p class="lead">${SAY[ns.level]}</p>
+    <p class="small">Based on satellite records up to ${endDate}.</p>
     <div class="season-alert">${seasonLine}</div>
   </section>
 
