@@ -15,7 +15,14 @@ But there's a problem. In 2012 a newer satellite arrived with sharper eyes. It s
 Both satellites are accurate, but they measure differently. If you join their records, it looks like fires suddenly exploded in 2012, and **that never happened.**
 So until now, nobody could get one clear 25-year answer.
 
-## [Slide 3: Our idea]
+## [Slide 3: The data we used]
+Everything in this project comes from **free NASA satellite data**.
+NASA's **MODIS** satellites, Terra and Aqua, have been recording fires since **2000**. Each dot they record covers about one kilometre.
+The newer **VIIRS** satellites, Suomi NPP and NOAA-20, joined in **2012** with sharper eyes. Each dot covers about 375 metres.
+Together that's **6.3 million fire detections** over Nigeria across **26 years**, and we add the latest seven days every week.
+For the map we used NASA's "Black Marble" night-time Earth, and the borders of Nigeria's 36 states and the FCT.
+
+## [Slide 4: How we made the records agree]
 Our idea was to make both satellites tell the same story. We did it in three steps.
 **One:** we cut Nigeria into small squares of about 10 km, and for each day we ask a simple question: was there fire here, yes or no? That way one fire can't be counted twenty times.
 **Two:** both satellites flew together for ten years, so we compared them side by side. The new one marks about four burning squares for every one the old one marks.
@@ -23,17 +30,12 @@ Our idea was to make both satellites tell the same story. We did it in three ste
 Before, the new satellite showed **four times more** fire. After our correction, the two differ by only **four percent**.
 Now we have **one trustworthy fire record, from 2000 to today.**
 
-## [Slide 4: What you get]
-On that record we built a web app. This is the **fire clock**.
-Each ring is one year. 2000 is in the centre and today is on the outside, with January at the top.
-Bright means lots of fire. You can see a bright band near the top every single year. That's the dry season, returning like clockwork.
-Below is the same data as a calendar: one row per year, one column per day.
-
-## [Slide 5: The danger time]
-From this, the app finds the **danger window** automatically.
-For Nigeria, it runs from **14 December to 13 February**, and two out of every three fires of the year happen in those nine weeks. The worst time is around **11 January**.
-It also gives a weekly alert. Right now, this week is **"Extreme"**: more fire than in 95 percent of past years for this time of year.
-And it works for each of the **37 states**, or any area you draw on the map.
+## [Slide 5: What we're providing]
+On that one record, we built **two ways to use it**.
+**For experts**, there's the detailed fire calendar: 25 years of fire on a map, a fire clock where each ring is one year, and a calendar view.
+It finds the **danger window** for every state automatically. For Nigeria, that's **14 December to 13 February**, worst around **11 January**, and two out of every three fires of the year happen in those nine weeks.
+**For everyone else**, there's the simple fire check. You pick your state, or press "Find my state", and it tells you in plain words whether bush burning is high this week, when the burning season starts, and how to stay safe, with real photos.
+Right now, for Nigeria, it says **"Very high, far above normal."**
 
 ## [Slide 6: Who it helps]
 Who does this help?
@@ -52,7 +54,7 @@ Harmattan turns 25 years of space data into decisions on the ground.
 
 ## Live demo (if they let you show the app, ~30 seconds)
 1. Open **lanzeroth.github.io/XORtil** and click **"Enter the fire calendar"**. Say: *"The globe flies into Nigeria, and this time-lapse shows 25 years of burning, month by month."*
-2. Choose a state from the dropdown (for example, **Niger** or your judges' home state). Say: *"Every chart updates for this state: its own danger window and its own weekly alert."*
+2. Open **/simple** and choose a state. Then on the detailed site, choose a state from the dropdown (for example, **Niger** or your judges' home state). Say: *"Every chart updates for this state: its own danger window and its own weekly alert."*
 3. Click the **Harmonization** tab. Say: *"Here's the proof: grey is the raw new satellite, and orange is after our correction, sitting on top of the old satellite."*
 
 ## Likely questions and simple answers

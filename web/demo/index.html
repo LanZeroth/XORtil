@@ -63,6 +63,26 @@
   .result { display: flex; align-items: center; gap: 40px; }
   .arrow { font-size: 70px; color: var(--muted); }
 
+  .card.src { padding: 18px 24px; border-left: 4px solid var(--gold); }
+  .card.src h3 { margin: 0 0 4px; font-size: 25px; }
+  .card.src p { font-size: 21px; }
+  .timeline { margin-top: 4px; }
+  .tl-row { display: grid; grid-template-columns: 190px 1fr; align-items: center; height: 26px; margin: 4px 0; }
+  .tl-row span { font-size: 17px; color: var(--muted); }
+  .tl-track { position: relative; height: 14px; display: block; }
+  .tl-track i { position: absolute; top: 0; height: 14px; border-radius: 7px; background: var(--gold); min-width: 8px; }
+  .tl-track i.v { background: var(--ember); }
+  .tl-axis { display: flex; justify-content: space-between; margin-left: 190px; font-size: 16px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 4px; }
+  .prov { padding: 26px 28px; }
+  .prov-h { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .prov-h h3 { margin: 0; font-size: 32px; }
+  .tag { align-self: flex-start; font-size: 16px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: 5px 12px; border-radius: 999px; background: linear-gradient(90deg, var(--ember), var(--gold)); color: #1a0d05; }
+  .tag.light { background: #fbf7f2; color: #c2410c; }
+  .prov-body { display: grid; grid-template-columns: 1fr; gap: 18px; }
+  .prov-body img.shot { width: 100% !important; height: 270px !important; object-fit: cover; }
+  .prov-body ul { margin: 0; padding-left: 22px; }
+  .prov-body li { font-size: 21px; line-height: 1.4; margin-bottom: 10px; }
+  .url { font-family: "Space Grotesk"; font-size: 22px; color: var(--gold); margin: 16px 0 0; }
   .pill { display: inline-block; border: 2px solid var(--hot); border-radius: 999px; padding: 10px 26px; font-size: 26px; box-shadow: 0 0 30px rgba(255,61,46,.3); }
   .qr { width: 300px; height: 300px; background: #fff; border-radius: 18px; padding: 16px; }
   .link { font-family: "Space Grotesk"; font-size: 40px; color: var(--gold); }
@@ -120,9 +140,35 @@
     <div class="foot"><span><b>Harmattan</b> · Team XORTil</span><span>2 / 7</span></div>
   </section>
 
-  <!-- 3. SOLUTION -->
+  <!-- 3. DATA -->
   <section class="slide">
-    <p class="kicker">Our idea</p>
+    <p class="kicker">The data we used</p>
+    <h1>Built on free NASA satellite data</h1>
+    <div class="grid2" style="grid-template-columns: 1.15fr .85fr; align-items: start; gap: 48px;">
+      <div style="display:grid;gap:16px">
+        <div class="card src"><h3>NASA FIRMS: MODIS satellites (Terra and Aqua)</h3><p>The older satellites, watching for fires since <b>2000</b>. Each dot they record covers about <b>1 km</b> of ground.</p></div>
+        <div class="card src"><h3>NASA FIRMS: VIIRS satellites (Suomi NPP and NOAA-20)</h3><p>The newer satellites, watching since <b>2012</b> with sharper eyes. Each dot covers about <b>375 m</b>.</p></div>
+        <div class="card src"><h3>Maps and boundaries</h3><p>NASA GIBS "Black Marble" night-time Earth for the map, and the borders of Nigeria's 36 states and the FCT.</p></div>
+        <div class="timeline">
+          <div class="tl-row"><span>MODIS Terra</span><b class="tl-track"><i style="left:3%;width:97%"></i></b></div>
+          <div class="tl-row"><span>MODIS Aqua</span><b class="tl-track"><i style="left:6.5%;width:93.5%"></i></b></div>
+          <div class="tl-row"><span>VIIRS Suomi NPP</span><b class="tl-track"><i class="v" style="left:43.1%;width:56.9%"></i></b></div>
+          <div class="tl-row"><span>VIIRS NOAA-20</span><b class="tl-track"><i class="v" style="left:98.5%;width:1.5%"></i></b></div>
+          <div class="tl-axis"><span>2000</span><span>2012</span><span>2026</span></div>
+        </div>
+      </div>
+      <div style="display:grid;gap:18px">
+        <div class="card"><div class="big" style="color:var(--gold);font-size:68px">6.3 million</div><p>fire detections over Nigeria</p></div>
+        <div class="card"><div class="big" style="font-size:68px">26 years</div><p>from November 2000 to November 2026</p></div>
+        <div class="card"><div class="big" style="font-size:68px">+ this week</div><p>the latest 7 days of fire data are added</p></div>
+      </div>
+    </div>
+    <div class="foot"><span><b>Harmattan</b> · Team XORTil</span><span>3 / 7</span></div>
+  </section>
+
+  <!-- 4. HOW WE MADE THE RECORDS AGREE -->
+  <section class="slide">
+    <p class="kicker">How we made the records agree</p>
     <h1>We made both satellites tell the same story</h1>
     <div class="steps">
       <div class="card"><div class="n">1</div><h3>Count squares, not dots</h3><p>We cut Nigeria into small squares (about 10 km). Each day, a square is simply "burning" or "not burning". One fire can no longer be counted 20 times.</p></div>
@@ -135,38 +181,37 @@
       <div class="card" style="flex:1"><div class="muted" style="font-size:22px">After correcting, they differ by only</div><div class="big" style="color:var(--gold)">4%</div><div class="muted" style="font-size:20px">they now agree</div></div>
       <div style="flex:1.6"><img class="shot" src="img/science.jpg" alt="Chart: raw new-satellite counts (dashed) are far above the old satellite; after adjustment (orange) they match" /></div>
     </div>
-    <div class="foot"><span><b>Harmattan</b> · Team XORTil</span><span>3 / 7</span></div>
-  </section>
-
-  <!-- 4. PRODUCT -->
-  <section class="slide">
-    <p class="kicker">What you get</p>
-    <h1>25 years of fire on one screen</h1>
-    <div class="grid2" style="grid-template-columns: .9fr 1.1fr;">
-      <img class="shot" src="img/spiral.jpg" alt="Spiral fire clock" style="max-height:600px;width:auto;justify-self:center" />
-      <div>
-        <p><span class="hl">The fire clock:</span> each ring is one year, from 2000 in the centre to today on the outside. January is at the top.</p>
-        <p>Bright means lots of fire. The bright band near the top is the <span class="hl">dry season</span>, and it returns every year, like clockwork.</p>
-        <img class="shot" src="img/grid.jpg" alt="Calendar: one row per year" style="margin-top:10px;max-height:300px;width:auto;max-width:100%" />
-        <p class="muted" style="font-size:21px;margin-top:10px">The calendar view: one row per year, one column per day.</p>
-      </div>
-    </div>
     <div class="foot"><span><b>Harmattan</b> · Team XORTil</span><span>4 / 7</span></div>
   </section>
 
-  <!-- 5. DANGER TIME -->
+  <!-- 5. WHAT WE'RE PROVIDING -->
   <section class="slide">
-    <p class="kicker">When is the danger time?</p>
-    <h1>Know the dangerous weeks before they arrive</h1>
-    <div class="grid2" style="grid-template-columns: 1.15fr .85fr; align-items: start;">
-      <div>
-        <img class="shot" src="img/season.jpg" alt="Season chart with normal range and critical period" />
-        <p class="muted" style="font-size:21px;margin-top:10px">Orange band = normal range from past years. White line = a chosen year. Shaded = danger window.</p>
+    <p class="kicker">What we're providing</p>
+    <h1>One fire record, two ways to use it</h1>
+    <div class="grid2" style="grid-template-columns: 1fr 1fr; gap: 44px; align-items: start;">
+      <div class="card prov">
+        <div class="prov-h"><span class="tag">For experts</span><h3>The detailed fire calendar</h3></div>
+        <div class="prov-body">
+          <img class="shot" src="img/spiral.jpg" alt="Spiral fire clock: one ring per year" style="object-position:center 40%" />
+          <ul>
+            <li>25 years of fire on a map, a fire clock and a calendar</li>
+            <li>The danger window for every state. Nigeria: <b class="hl">14 Dec – 13 Feb</b>, worst around <b>11 Jan</b></li>
+            <li>Unusual years and proof that the correction works</li>
+          </ul>
+        </div>
+        <p class="url">lanzeroth.github.io/XORtil</p>
       </div>
-      <div style="display:grid;gap:18px">
-        <div class="card"><div class="muted" style="font-size:20px">Nigeria's danger window</div><div class="big" style="font-size:58px;color:var(--gold)">14 Dec – 13 Feb</div><p>2 out of every 3 fires of the year happen in these 9 weeks.</p></div>
-        <div class="card"><div class="muted" style="font-size:20px">Worst time of year</div><div class="big" style="font-size:58px">around 11 Jan</div></div>
-        <div><span class="pill">This week: <b>Extreme</b>, more fire than 95% of past years</span><p class="muted" style="font-size:19px;margin:8px 0 0">Live status as of 14 Nov 2026. Also works for each of the 37 states, or any area you draw.</p></div>
+      <div class="card prov">
+        <div class="prov-h"><span class="tag light">For everyone</span><h3>The simple fire check</h3></div>
+        <div class="prov-body">
+          <img class="shot" src="img/simple.jpg" alt="Simple fire check page showing this week's status for a state" style="object-position:top" />
+          <ul>
+            <li>Pick your state, or press <b>"Find my state"</b></li>
+            <li>"Is bush burning high this week?" answered in plain words</li>
+            <li>When the burning season starts, and how to stay safe, with real photos</li>
+          </ul>
+        </div>
+        <p class="url">lanzeroth.github.io/XORtil/simple</p>
       </div>
     </div>
     <div class="foot"><span><b>Harmattan</b> · Team XORTil</span><span>5 / 7</span></div>
