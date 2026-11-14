@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Harmattan Fire Check</title>
-<meta name="description" content="Simple fire check for Nigeria: is fire risk high this week, when is fire season in your state, and is it getting better or worse. Built from NASA satellite data." />
+<meta name="description" content="Check bush burning in your state: is it high this week, when is the burning season, and is it reducing or increasing. Built from NASA satellite records." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
@@ -101,24 +101,24 @@
 <div class="wrap">
   <header>
     <div class="logo"><span class="mark" aria-hidden="true"></span>Harmattan</div>
-    <p>Fire activity in Nigeria, based on 25 years of NASA satellite records</p>
+    <p>Bush burning in Nigeria: what 25 years of NASA satellite records show</p>
   </header>
 
   <section class="pick" aria-label="Choose your area">
-    <label for="place">Where do you live?</label>
+    <label for="place">Which state are you in?</label>
     <div class="pick-row">
       <select id="place"><option>Loading…</option></select>
-      <button class="btn" id="locate" type="button">Use my location</button>
+      <button class="btn" id="locate" type="button">Find my state</button>
     </div>
     <p class="loc-msg" id="locMsg"></p>
   </section>
 
-  <div id="out"><div class="loading">Loading 25 years of fire data…</div></div>
+  <div id="out"><div class="loading">Loading 25 years of satellite records…</div></div>
 
   <footer>
     Fire data: NASA FIRMS satellites (MODIS and VIIRS), 2000 to today. Map tiles © Esri and OpenStreetMap contributors. State borders: geoBoundaries.<br />
-    In an emergency in Nigeria, call <b>112</b>.<br />
-    Want the full charts? <a href="../">Open the detailed version</a> · Team XORTil
+    In case of emergency, call <b>112</b> or your nearest Fire Service station.<br />
+    For the full charts, <a href="../">open the detailed version</a> · Team XORTil
   </footer>
 </div>
 
@@ -159,11 +159,19 @@ function seriesFor(key) {
 }
 
 const LEVELS = {
-  below:   { text: "Less fire than usual" },
-  normal:  { text: "About normal" },
-  above:   { text: "More fire than usual" },
-  extreme: { text: "Much more fire than usual" },
+  below:   { text: "Lower than normal" },
+  normal:  { text: "Normal for this time of year" },
+  above:   { text: "Higher than normal" },
+  extreme: { text: "Very high, far above normal" },
 };
+
+/* Nigerian date style: "9 Dec" -> "9th December", "14 Nov 2026" -> "14th November, 2026" */
+const FULL = { Jan: "January", Feb: "February", Mar: "March", Apr: "April", May: "May", Jun: "June", Jul: "July", Aug: "August", Sep: "September", Oct: "October", Nov: "November", Dec: "December" };
+const th = d => d + (d % 100 >= 11 && d % 100 <= 13 ? "th" : ["th", "st", "nd", "rd"][d % 10] || "th");
+function ng(label) {
+  const [d, m, y] = label.split(" ");
+  return `${th(+d)} ${FULL[m]}${y ? ", " + y : ""}`;
+}
 
 function render(key) {
   const name = key === "nga" ? "Nigeria" : D.states.names[+key];
@@ -174,7 +182,7 @@ function render(key) {
   const ns = nowStatus(h, tl, crit);
   const L = LEVELS[ns.level];
   const of20 = Math.round(ns.pct / 100 * 20);
-  const endDate = tl.fmt(ns.end);
+  const endDate = ng(tl.fmt(ns.end));
 
   // monthly averages over 2003-2022
   const mt = monthlyTotals(h, tl);
@@ -189,7 +197,8 @@ function render(key) {
   const early = rows.filter(r => r.fy >= 2003 && r.fy <= 2007), late = rows.slice(-5);
   const mean = a => a.reduce((s, r) => s + r.total, 0) / Math.max(1, a.length);
   const change = Math.round(100 * (mean(late) / (mean(early) || 1) - 1));
-  const trendWord = change <= -5 ? `about <b>${-change}% fewer</b> fires` : change >= 5 ? `about <b>${change}% more</b> fires` : "<b>about the same</b> amount of fire";
+  const trendHead = change <= -5 ? `Burning has reduced by about ${-change}%` : change >= 5 ? `Burning has increased by about ${change}%` : "Burning has stayed about the same";
+  const trendWord = change <= -5 ? `has reduced by about <b>${-change}%</b>` : change >= 5 ? `has increased by about <b>${change}%</b>` : "has stayed <b>about the same</b>";
   const trendCls = change <= -5 ? "down" : change >= 5 ? "up" : "";
 
   // fires this week inside the area
@@ -197,52 +206,52 @@ function render(key) {
   const pts = D.recent.features.filter(f => !feat || inGeom(f.geometry.coordinates[0], f.geometry.coordinates[1], feat.geometry));
 
   const seasonLine = ns.inCrit
-    ? `<b>Fire season is under way</b> in ${name} and usually lasts until about <b>${fdoyLabel(crit.end)}</b>.`
-    : `Fire season in ${name} usually starts in about <b>${ns.daysToCrit} days</b> (around <b>${fdoyLabel(crit.start)}</b>).`;
+    ? `<b>The burning season is on now</b> in ${name}. It usually continues till about <b>${ng(fdoyLabel(crit.end))}</b>.`
+    : `The burning season in ${name} usually starts in about <b>${ns.daysToCrit} days</b> (around <b>${ng(fdoyLabel(crit.start))}</b>). Start preparing now.`;
 
   $("#out").innerHTML = `
   <section class="card status lvl-${ns.level}" aria-live="polite">
-    <p class="q"><span class="num">1</span> Is fire high right now?</p>
+    <p class="q"><span class="num">1</span> Is bush burning high this week?</p>
     <h2>This week in ${where}</h2>
     <div class="badge">${L.text}</div>
-    <p class="lead">In the past 7 days (up to ${endDate}), satellites saw <b>more fire than in ${of20} of 20 past years</b> (2003–2022) at the same time of year.</p>
-    <div class="dots" role="img" aria-label="${of20} out of 20 past years had less fire">${Array.from({ length: 20 }, (_, i) => `<i class="${i < of20 ? "on" : ""}"></i>`).join("")}</div>
-    <p class="small">Each square is one past year (2003–2022). Orange squares are years that had <b>less</b> fire than this week.</p>
+    <p class="lead">In the last 7 days (up to ${endDate}), satellites recorded <b>more burning than in ${of20} of the 20 past years</b> (2003–2022) for the same week.</p>
+    <div class="dots" role="img" aria-label="${of20} out of 20 past years had less burning">${Array.from({ length: 20 }, (_, i) => `<i class="${i < of20 ? "on" : ""}"></i>`).join("")}</div>
+    <p class="small">Each box stands for one past year (2003–2022). Orange boxes are years that had <b>less</b> burning than this week.</p>
     <div class="season-alert">${seasonLine}</div>
   </section>
 
   <section class="card">
-    <p class="q"><span class="num">2</span> When is fire season?</p>
-    <h2>Most fires happen from ${fdoyLabel(crit.start)} to ${fdoyLabel(crit.end)}</h2>
-    <p class="lead">That's about <b>${Math.round(crit.length / 7)} weeks</b>, and it holds <b>${Math.round(crit.share * 100)}%</b> of all the fire in a year. The worst time is usually around <b>${fdoyLabel(crit.peak)}</b>.</p>
+    <p class="q"><span class="num">2</span> When is the burning season?</p>
+    <h2>Most burning happens between ${ng(fdoyLabel(crit.start))} and ${ng(fdoyLabel(crit.end))}</h2>
+    <p class="lead">This is the heart of the dry (harmattan) season: about <b>${Math.round(crit.length / 7)} weeks</b> that carry <b>${Math.round(crit.share * 100)}%</b> of the whole year's burning. It is usually at its worst around <b>${ng(fdoyLabel(crit.peak))}</b>.</p>
     <div class="months" id="months">${avg.map((v, m) => `<div class="bar ${hotMonth(m) ? "hot" : ""}" style="height:0" data-h="${Math.max(3, 100 * v / mmax)}" title="${MONTHS[m]}"></div>`).join("")}</div>
     <div class="mlabels">${MONTHS.map((n, m) => m === top ? `<b>${n}</b>` : `<span>${n}</span>`).join("")}</div>
-    <div class="legend"><span><i style="background:linear-gradient(180deg,var(--gold),var(--fire))"></i>Fire season months</span><span><i style="background:var(--line)"></i>Quieter months</span></div>
-    <p class="small">Average amount of fire in each month, 2003–2022. Taller means more fire.</p>
+    <div class="legend"><span><i style="background:linear-gradient(180deg,var(--gold),var(--fire))"></i>Burning season</span><span><i style="background:var(--line)"></i>Rainy season / low burning</span></div>
+    <p class="small">Average burning in each month, 2003–2022. The taller the bar, the more burning.</p>
   </section>
 
   <section class="card">
-    <p class="q"><span class="num">3</span> Is it getting better or worse?</p>
-    <h2>Recent years had <span class="trend ${trendCls}">${trendWord.replace(/<\/?b>/g, "")}</span></h2>
-    <p class="lead">Compared with the mid-2000s, the last 5 fire seasons in ${name} had ${trendWord}.</p>
-    <div class="years" id="years">${rows.map((r, i) => `<div class="bar ${i >= rows.length - 5 ? "recent" : ""}" style="height:0" data-h="${Math.max(2, 100 * r.total / ymax)}" title="Fire season ${r.fy}/${String((r.fy + 1) % 100).padStart(2, "0")}"></div>`).join("")}</div>
-    <div class="ylabels"><span>${rows[0]?.fy ?? ""}</span><span>Each bar = one fire season (July–June)</span><span>${(rows.at(-1)?.fy ?? 0) + 1}</span></div>
+    <p class="q"><span class="num">3</span> Is it reducing or increasing?</p>
+    <h2><span class="trend ${trendCls}">${trendHead}</span></h2>
+    <p class="lead">Compared to the mid-2000s, burning in ${name} over the last 5 dry seasons ${trendWord}.</p>
+    <div class="years" id="years">${rows.map((r, i) => `<div class="bar ${i >= rows.length - 5 ? "recent" : ""}" style="height:0" data-h="${Math.max(2, 100 * r.total / ymax)}" title="Dry season ${r.fy}/${String((r.fy + 1) % 100).padStart(2, "0")}"></div>`).join("")}</div>
+    <div class="ylabels"><span>${rows[0]?.fy ?? ""}</span><span>Each bar is one dry season (July to June)</span><span>${(rows.at(-1)?.fy ?? 0) + 1}</span></div>
   </section>
 
   <section class="card">
-    <p class="q"><span class="num">4</span> Where are the fires this week?</p>
-    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span class="count">${pts.length.toLocaleString("en-US")}</span><span class="lead">fire spots seen by satellite in ${where} in the last 7 days</span></div>
-    <div id="map" role="img" aria-label="Map of fire spots this week"></div>
-    <p class="small">Each orange dot is a fire spot seen from space. One large fire can show as several dots.</p>
+    <p class="q"><span class="num">4</span> Where is burning happening this week?</p>
+    <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap"><span class="count">${pts.length.toLocaleString("en-US")}</span><span class="lead">burning points detected by satellite in ${where} in the last 7 days</span></div>
+    <div id="map" role="img" aria-label="Map of burning points this week"></div>
+    <p class="small">Each orange dot is a burning point seen from space. One big fire can show as several dots.</p>
   </section>
 
   <section class="card">
-    <p class="q"><span class="num">5</span> How to reduce the risk</p>
+    <p class="q"><span class="num">5</span> How to stay safe this dry season</p>
     <div class="tips">
-      <div class="tip"><b>Clear dry vegetation</b>Remove dry grass and leaves around homes, farms and storage before the season starts.</div>
-      <div class="tip"><b>Avoid burning on windy days</b>The Harmattan wind can carry a small fire a long way in minutes.</div>
-      <div class="tip"><b>Make firebreaks</b>Strips of bare ground around farms and settlements stop fire from spreading.</div>
-      <div class="tip"><b>Report spreading fires</b>Move to a safe place and call the emergency number 112.</div>
+      <div class="tip"><b>Clear your surroundings</b>Clear dry grass, leaves and refuse around your compound, farm and store before the harmattan sets in.</div>
+      <div class="tip"><b>Don't burn when the wind is strong</b>Harmattan wind can carry a small bush fire very far within minutes. Never leave a fire unattended.</div>
+      <div class="tip"><b>Make firebreaks</b>Clear a wide strip of bare ground around your farmland and village so fire cannot cross it.</div>
+      <div class="tip"><b>Report fires early</b>If you see a fire spreading, move to a safe place and call 112 or the nearest Fire Service.</div>
     </div>
   </section>`;
 
@@ -281,11 +290,11 @@ function drawMap(feat, pts) {
     D = { meta, national, states, recent, geo };
     tl = new Timeline(national.start, national.ndays, meta.missing);
   } catch (e) {
-    $("#out").innerHTML = `<div class="loading">Sorry, the fire data could not load. Please refresh the page.</div>`; console.error(e); return;
+    $("#out").innerHTML = `<div class="loading">Sorry, the records could not load. Please check your network and refresh the page.</div>`; console.error(e); return;
   }
   const sel = $("#place");
   const opts = D.states.names.map((n, i) => [String(i), n]).sort((a, b) => a[1].localeCompare(b[1]));
-  sel.innerHTML = `<option value="nga">All of Nigeria</option>` + opts.map(([v, n]) => `<option value="${v}">${n}</option>`).join("");
+  sel.innerHTML = `<option value="nga">Whole of Nigeria</option>` + opts.map(([v, n]) => `<option value="${v}">${n}</option>`).join("");
   let saved = null; try { saved = localStorage.getItem("harmattan-place"); } catch {}
   if (saved && [...sel.options].some(o => o.value === saved)) sel.value = saved;
   sel.onchange = () => { try { localStorage.setItem("harmattan-place", sel.value); } catch {} render(sel.value); };
@@ -293,15 +302,15 @@ function drawMap(feat, pts) {
 
   $("#locate").onclick = () => {
     const msg = $("#locMsg");
-    if (!navigator.geolocation) { msg.textContent = "Your browser can't share location. Please choose your state from the list."; return; }
-    msg.textContent = "Finding your location…";
+    if (!navigator.geolocation) { msg.textContent = "Your phone or browser cannot share location. Please choose your state from the list."; return; }
+    msg.textContent = "Checking your location…";
     navigator.geolocation.getCurrentPosition(p => {
       const { longitude: x, latitude: y } = p.coords;
       const f = D.geo.features.find(f => inGeom(x, y, f.geometry));
-      if (!f) { msg.textContent = "You seem to be outside Nigeria. Showing all of Nigeria."; sel.value = "nga"; }
-      else { msg.textContent = `Location found: ${f.properties.name}.`; sel.value = String(f.id); }
+      if (!f) { msg.textContent = "You appear to be outside Nigeria, so we are showing the whole country."; sel.value = "nga"; }
+      else { msg.textContent = `You are in ${f.properties.name}.`; sel.value = String(f.id); }
       sel.onchange();
-    }, () => { msg.textContent = "Location was not shared. Please choose your state from the list."; }, { timeout: 10000 });
+    }, () => { msg.textContent = "Location was not allowed. Please choose your state from the list."; }, { timeout: 10000 });
   };
 })();
 </script>
