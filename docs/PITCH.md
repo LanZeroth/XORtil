@@ -24,8 +24,8 @@ For the map we used NASA's "Black Marble" night-time Earth, and the borders of N
 
 ## [Slide 4: How we made the records agree]
 Our idea was to make both satellites tell the same story. We did it in three steps.
-**One:** we cut Nigeria into small squares of about 10 km, and for each day we ask a simple question: was there fire here, yes or no? That way one fire can't be counted twenty times.
-**Two:** both satellites flew together for ten years, so we compared them side by side. The new one marks about four burning squares for every one the old one marks.
+**One:** look at this picture. The old satellite sees one fire as two big dots. The new, sharper satellite sees the same fire as nine small dots. If we count dots, the new one always looks like there's more fire. So we stop counting dots. We divide the map into boxes of about 10 km, and for each box we ask one question: was there fire here today, yes or no? Both satellites say **yes**, so now they agree.
+**Two:** both satellites flew together for ten years, so we compared their yes-or-no answers. The new one still said yes for about four boxes for every one the old one did, because it catches small fires the old one misses.
 **Three:** we corrected the new satellite to match, and then we tested it on four years we had kept hidden.
 Before, the new satellite showed **four times more** fire. After our correction, the two differ by only **four percent**.
 Now we have **one trustworthy fire record, from 2000 to today.**
@@ -64,7 +64,7 @@ No. Both are accurate. They just measure differently, so their records couldn't 
 **"How do you know your correction works?"**
 We worked out the correction using 2012 to 2021 only, then tested it on 2022 to 2025, years it had never seen. The difference dropped from about four times to four percent.
 
-**"Why squares instead of counting fires?"**
+**"Why boxes instead of counting fires?"**
 The sharp satellite can see one fire as many small dots. Asking "was this square burning today, yes or no" stops one fire being counted many times, so both satellites are counted fairly.
 
 **"Why does it matter if the old satellite is still working?"**
