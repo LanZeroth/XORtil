@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Harmattan Demo Slides</title>
+<meta name="description" content="7-slide demo of Harmattan, a 25-year burning calendar for Nigeria from NASA satellite fire data. Team XORTil, NASA Space Apps 2026." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root { --bg:#0a0b10; --panel:#14161f; --line:#272b37; --text:#f1ede6; --muted:#a3a6ae; --ember:#ff7a1a; --gold:#ffc857; --hot:#ff3d2e; --cool:#4ea8de; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #000; color: var(--text); font-family: Inter, system-ui, sans-serif; }
+  .deck { position: fixed; inset: 0; display: grid; place-items: center; overflow: hidden; }
+  .slide { position: absolute; width: 1600px; height: 900px; background: var(--bg); overflow: hidden; padding: 70px 90px 60px;
+           transform-origin: center center; opacity: 0; pointer-events: none; transition: opacity .5s ease; }
+  .slide.on { opacity: 1; pointer-events: auto; }
+  .slide::after { content: ""; position: absolute; inset: auto 0 0 0; height: 260px; background: radial-gradient(ellipse at 50% 140%, rgba(255,90,20,.22), transparent 70%); pointer-events: none; }
+  .foot { position: absolute; left: 90px; right: 90px; bottom: 26px; display: flex; justify-content: space-between; font-size: 18px; color: var(--muted); z-index: 2; }
+  .foot b { color: var(--gold); font-weight: 600; }
+  .kicker { font-size: 20px; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); margin: 0 0 14px; }
+  h1 { font-family: "Space Grotesk"; font-size: 64px; line-height: 1.05; margin: 0 0 22px; letter-spacing: -.01em; }
+  h1 em { font-style: normal; color: var(--gold); }
+  p, li { font-size: 28px; line-height: 1.45; }
+  .muted { color: var(--muted); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  .shot { width: 100%; border-radius: 18px; border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0,0,0,.6), 0 0 60px rgba(255,122,26,.12); display: block; }
+  .big { font-family: "Space Grotesk"; font-weight: 700; font-size: 84px; line-height: 1; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 22px 26px; }
+  .who .card { display: grid; grid-template-columns: 60px 1fr; column-gap: 14px; padding: 18px 24px; }
+  .who .card .icon { grid-row: span 2; font-size: 42px; align-self: center; }
+  .who .card h3 { margin: 0 0 4px; font-size: 27px; }
+  .who .card p { font-size: 21px; }
+  .card h3 { font-family: "Space Grotesk"; font-size: 30px; margin: 10px 0 8px; }
+  .card p { font-size: 23px; margin: 0; color: #cfcac2; }
+  .icon { font-size: 44px; }
+  .hl { color: var(--gold); font-weight: 600; }
+  .hot { color: var(--hot); } .cool { color: var(--cool); }
+
+  /* slide 1 */
+  .s1 { padding: 0; }
+  .s1 .bg { position: absolute; inset: 0 0 0 38%; background: url(img/map.jpg) center 12% / cover; }
+  .s1 .bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, var(--bg) 0%, rgba(10,11,16,.75) 30%, rgba(10,11,16,.1) 70%); }
+  .s1 .inner { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 0 110px; }
+  .s1 .title { font-family: "Space Grotesk"; font-weight: 700; font-size: 150px; letter-spacing: .06em; line-height: 1; margin: 0;
+               background: linear-gradient(180deg,#fff3d6,var(--gold) 35%,var(--ember) 70%,#a3220e); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .s1 .sub { font-family: "Space Grotesk"; font-size: 44px; margin: 22px 0 46px; max-width: 1150px; line-height: 1.2; }
+  .meta { display: grid; grid-template-columns: auto 1fr; gap: 8px 26px; font-size: 26px; }
+  .meta span:nth-child(odd) { color: var(--muted); }
+
+  /* slide 2 chart */
+  .bars { display: flex; align-items: flex-end; gap: 8px; height: 330px; border-bottom: 2px solid var(--line); padding: 0 4px; }
+  .bar { flex: 1; display: flex; flex-direction: column-reverse; gap: 2px; }
+  .bar i { display: block; border-radius: 4px 4px 0 0; }
+  .bar .m { background: var(--gold); } .bar .v { background: var(--ember); opacity: .9; }
+  .axis { display: flex; justify-content: space-between; font-size: 18px; color: var(--muted); margin-top: 8px; }
+  .legend { display: flex; gap: 30px; font-size: 22px; margin-bottom: 14px; }
+  .legend i { display: inline-block; width: 18px; height: 18px; border-radius: 4px; margin-right: 10px; vertical-align: -2px; }
+
+  /* steps */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; margin: 34px 0 34px; }
+  .steps .n { font-family: "Space Grotesk"; font-size: 22px; color: #1a0d05; background: linear-gradient(90deg,var(--ember),var(--gold)); width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; }
+  .result { display: flex; align-items: center; gap: 40px; }
+  .arrow { font-size: 70px; color: var(--muted); }
+
+  .pill { display: inline-block; border: 2px solid var(--hot); border-radius: 999px; padding: 10px 26px; font-size: 26px; box-shadow: 0 0 30px rgba(255,61,46,.3); }
+  .qr { width: 300px; height: 300px; background: #fff; border-radius: 18px; padding: 16px; }
+  .link { font-family: "Space Grotesk"; font-size: 40px; color: var(--gold); }
+
+  .nav { position: fixed; top: 12px; right: 14px; display: flex; gap: 8px; z-index: 10; }
+  .nav button { background: rgba(20,22,31,.85); color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 8px 14px; font-size: 15px; cursor: pointer; }
+  .nav button:hover { border-color: var(--ember); }
+  .count { position: fixed; top: 18px; left: 16px; color: var(--muted); font-size: 14px; z-index: 10; }
+
+  @media print {
+    @page { size: 1600px 900px; margin: 0; }
+    html, body { background: var(--bg); }
+    .deck { position: static; display: block; }
+    .slide { position: relative; opacity: 1 !important; transform: none !important; page-break-after: always; break-after: page; }
+    .nav, .count { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+
+  <!-- 1. TITLE -->
+  <section class="slide s1">
+    <div class="bg"></div>
+    <div class="inner">
+      <p class="kicker">NASA Space Apps Challenge 2026 · Lagos, Nigeria</p>
+      <h2 class="title">HARMATTAN</h2>
+      <p class="sub">When does Nigeria burn? 25 years of satellite fire records, turned into <span class="hl">one easy calendar</span>.</p>
+      <div class="meta">
+        <span>Team</span><span><b>XORTil</b></span>
+        <span>Member</span><span>Abdullah Shittu</span>
+        <span>Challenge</span><span>Harmonization of MODIS and VIIRS Hot Spots</span>
+        <span>Live app</span><span class="hl">lanzeroth.github.io/XORtil</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. PROBLEM -->
+  <section class="slide">
+    <p class="kicker">The problem</p>
+    <h1>Two satellites, two different answers</h1>
+    <div class="grid2" style="grid-template-columns: 1fr 1.05fr; align-items: start;">
+      <div>
+        <p>Every dry season, bush and farm fires spread across Nigeria. They burn crops, homes and forests and fill the air with smoke.</p>
+        <p>Satellites have watched these fires from space since 2000. In 2012 a <span class="hl">newer satellite with sharper eyes</span> joined, and it counts <span class="hl">about 5 times more</span> fire spots.</p>
+        <p class="muted">It's like switching to a new bathroom scale that reads heavier. You can no longer tell whether you really gained weight. In the same way, nobody could tell whether fires are really getting worse.</p>
+      </div>
+      <div>
+        <div class="legend"><span><i style="background:var(--gold)"></i>Older satellite (MODIS)</span><span><i style="background:var(--ember)"></i>Newer satellite (VIIRS)</span></div>
+        <div class="bars" id="bars"></div>
+        <div class="axis"><span>2003</span><span>2012 · new satellite arrives</span><span>2025</span></div>
+        <p class="muted" style="font-size:20px;margin-top:10px">Fire spots counted over Nigeria each year. Source: NASA FIRMS.</p>
+      </div>
+    </div>
+    <div class="foot"><span><b>Harmattan</b> · Team XORTil</span><span>2 / 7</span></div>
+  </section>
+
+  <!-- 3. SOLUTION -->
+  <section class="slide">
+    <p class="kicker">Our idea</p>
+    <h1>One fair ruler for both satellites</h1>
+    <div class="steps">
+      <div class="card"><div class="n">1</div><h3>Same grid</h3><p>We place every fire on the same map of ~10 km squares, day by day, so sharper eyes stop counting one fire many times.</p></div>
+      <div class="card"><div class="n">2</div><h3>Learn the difference</h3><p>Using 10 years when both satellites flew together, we measure how much more the new one sees in each part of Nigeria.</p></div>
+      <div class="card"><div class="n">3</div><h3>Adjust and test</h3><p>We adjust the new satellite to match, then test it on 4 later years it had never seen.</p></div>
+    </div>
+    <div class="result">
+      <div class="card" style="flex:1"><div class="muted" style="font-size:22px">Before: new satellite over-counts by</div><div class="big hot">274%</div></div>
+      <div class="arrow">→</div>
+      <div class="card" style="flex:1"><div class="muted" style="font-size:22px">After: the two agree within</div><div class="big" style="color:var(--gold)">4%</div></div>
+      <div style="flex:1.6"><img class="shot" src="img/science.jpg" alt="Chart: raw new-satellite counts (dashed) are far above the old satellite; after adjustment (orange) they match" /></div>
+    </div>
+    <div class="foot"><span><b>Harmattan</b> · Team XORTil</span><span>3 / 7</span></div>
+  </section>
+
+  <!-- 4. PRODUCT -->
+  <section class="slide">
+    <p class="kicker">What you get</p>
+    <h1>25 years of fire on one screen</h1>
+    <div class="grid2" style="grid-template-columns: .9fr 1.1fr;">
+      <img class="shot" src="img/spiral.jpg" alt="Spiral fire clock" style="max-height:600px;width:auto;justify-self:center" />
+      <div>
+        <p><span class="hl">The fire clock:</span> each ring is one year, from 2000 in the centre to today on the outside. January is at the top.</p>
+        <p>Bright means lots of fire. The bright band near the top is the <span class="hl">dry season</span>, and it returns every year, like clockwork.</p>
+        <img class="shot" src="img/grid.jpg" alt="Calendar: one row per year" style="margin-top:10px;max-height:300px;width:auto;max-width:100%" />
+        <p class="muted" style="font-size:21px;margin-top:10px">The calendar view: one row per year, one column per day.</p>
+      </div>
+    </div>
+    <div class="foot"><span><b>Harmattan</b> · Team XORTil</span><span>4 / 7</span></div>
+  </section>
+
+  <!-- 5. DANGER TIME -->
+  <section class="slide">
+    <p class="kicker">When is the danger time?</p>
+    <h1>Know the dangerous weeks before they arrive</h1>
+    <div class="grid2" style="grid-template-columns: 1.15fr .85fr; align-items: start;">
+      <div>
+        <img class="shot" src="img/season.jpg" alt="Season chart with normal range and critical period" />
+        <p class="muted" style="font-size:21px;margin-top:10px">Orange band = normal range from past years. White line = a chosen year. Shaded = danger window.</p>
+      </div>
+      <div style="display:grid;gap:18px">
+        <div class="card"><div class="muted" style="font-size:20px">Nigeria's danger window</div><div class="big" style="font-size:58px;color:var(--gold)">14 Dec – 13 Feb</div><p>2 out of every 3 fires of the year happen in these 9 weeks.</p></div>
+        <div class="card"><div class="muted" style="font-size:20px">Worst time of year</div><div class="big" style="font-size:58px">around 11 Jan</div></div>
+        <div><span class="pill">This week: <b>Extreme</b>, more fire than 95% of past years</span><p class="muted" style="font-size:19px;margin:8px 0 0">Live status as of 14 Nov 2026. Also works for each of the 37 states, or any area you draw.</p></div>
+      </div>
+    </div>
+    <div class="foot"><span><b>Harmattan</b> · Team XORTil</span><span>5 / 7</span></div>
+  </section>
+
+  <!-- 6. WHO IT HELPS -->
+  <section class="slide">
+    <p class="kicker">Who it helps</p>
+    <h1>From space data to decisions on the ground</h1>
+    <div class="grid2 who" style="grid-template-columns: .8fr 1.2fr;">
+      <img class="shot" src="img/map.jpg" alt="Map of Nigeria showing burning in January 2024" style="max-height:600px;width:auto;justify-self:center" />
+      <div style="display:grid;gap:16px">
+        <div class="card"><span class="icon">🚒</span><h3>Fire and emergency services</h3><p>Know when and where to get ready, and get a simple "normal / extreme" alert each week.</p></div>
+        <div class="card"><span class="icon">🌾</span><h3>Farmers and land managers</h3><p>Plan safer burning, firebreaks and awareness campaigns before each state's danger window.</p></div>
+        <div class="card"><span class="icon">🔬</span><h3>Scientists and government</h3><p>A trustworthy 25-year record. It shows burning in Nigeria is down about 27% since the mid-2000s.</p></div>
+        <p class="muted" style="font-size:21px;margin:0">Built only from free, open NASA satellite data: 6.3 million fire detections.</p>
+      </div>
+    </div>
+    <div class="foot"><span><b>Harmattan</b> · Team XORTil</span><span>6 / 7</span></div>
+  </section>
+
+  <!-- 7. NEXT + TRY IT -->
+  <section class="slide">
+    <p class="kicker">Try it · What's next</p>
+    <h1>Open it on your phone <em>right now</em></h1>
+    <div class="grid2" style="grid-template-columns: auto 1fr; gap: 70px;">
+      <div style="text-align:center">
+        <img class="qr" src="img/qr.svg" alt="QR code to lanzeroth.github.io/XORtil" />
+        <div class="link" style="margin-top:18px">lanzeroth.github.io/XORtil</div>
+        <p class="muted" style="font-size:20px">Free · no login · works on phones<br />Code: github.com/LanZeroth/XORtil</p>
+      </div>
+      <div>
+        <p style="margin-top:0" class="hl"><b>Next steps</b></p>
+        <ul style="margin:0;padding-left:30px">
+          <li>📱 Weekly SMS fire alerts in <span class="hl">Hausa, Yoruba, Igbo and Pidgin</span></li>
+          <li>🌍 Every country in Africa, then the world. The same method works anywhere.</li>
+          <li>🛰️ Add the newest satellites so the record continues for decades</li>
+          <li>🤝 Partner with Nigeria's emergency and space agencies</li>
+        </ul>
+        <p class="big" style="font-size:56px;margin-top:40px">Thank you.</p>
+        <p class="muted" style="font-size:22px">Team XORTil · Abdullah Shittu · Data: NASA FIRMS (MODIS &amp; VIIRS), NASA GIBS</p>
+      </div>
+    </div>
+    <div class="foot"><span><b>Harmattan</b> · Team XORTil</span><span>7 / 7</span></div>
+  </section>
+</div>
+
+<div class="count" id="count"></div>
+<div class="nav">
+  <button id="prev" aria-label="Previous slide">←</button>
+  <button id="next" aria-label="Next slide">→</button>
+  <a href="Harmattan-demo.pdf" download><button>PDF</button></a>
+  <a href="../"><button>Open app</button></a>
+</div>
+
+<script>
+  // problem chart: fire spots per year (NASA FIRMS, Nigeria)
+  const D = {"2003":[90644,0],"2004":[99497,0],"2005":[92052,0],"2006":[90537,0],"2007":[98336,0],"2008":[87317,0],"2009":[70463,0],"2010":[72371,0],"2011":[63379,0],"2012":[61425,215640],"2013":[53204,294602],"2014":[53924,302114],"2015":[61040,332353],"2016":[68847,365348],"2017":[67732,366689],"2018":[63255,336325],"2019":[54028,306898],"2020":[68213,346209],"2021":[66892,350382],"2022":[67085,367956],"2023":[58882,310098],"2024":[69258,364275],"2025":[57380,326613]};
+  const max = Math.max(...Object.values(D).map(([m, v]) => Math.max(m, v)));
+  document.getElementById("bars").innerHTML = Object.entries(D).map(([y, [m, v]]) =>
+    `<div class="bar" style="flex-direction:row;align-items:flex-end" title="${y}: older ${m.toLocaleString()}, newer ${v.toLocaleString()}">` +
+    `<i class="m" style="flex:1;height:${m / max * 320}px"></i>` + (v ? `<i class="v" style="flex:1;height:${v / max * 320}px"></i>` : "") + `</div>`).join("");
+
+  // navigation + scaling
+  const slides = [...document.querySelectorAll(".slide")];
+  let k = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1)) || 1) - 1));
+  const fit = () => { const s = Math.min(innerWidth / 1600, innerHeight / 900); slides.forEach(el => el.style.transform = `scale(${s})`); };
+  const show = i => { k = Math.max(0, Math.min(slides.length - 1, i)); slides.forEach((s, j) => s.classList.toggle("on", j === k)); document.getElementById("count").textContent = `${k + 1} / ${slides.length} · use ← → keys`; history.replaceState(null, "", "#" + (k + 1)); };
+  addEventListener("resize", fit); fit(); show(k);
+  addEventListener("keydown", e => { if (["ArrowRight", "PageDown", " "].includes(e.key)) show(k + 1); if (["ArrowLeft", "PageUp"].includes(e.key)) show(k - 1); });
+  document.getElementById("next").onclick = () => show(k + 1);
+  document.getElementById("prev").onclick = () => show(k - 1);
+  let x0 = null; addEventListener("touchstart", e => x0 = e.touches[0].clientX); addEventListener("touchend", e => { if (x0 == null) return; const dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 50) show(k + (dx < 0 ? 1 : -1)); x0 = null; });
+</script>
+</body>
+</html>

@@ -268,7 +268,7 @@ export function valCards(el, meta) {
 export function valSeries(el, meta) {
   el.innerHTML = "";
   const data = meta.validation.national_series.map(([k, m, v, ve]) => ({ d: new Date(k + "-15"), m, v, ve }));
-  const W = el.clientWidth || 480, H = 210, mg = { t: 24, r: 8, b: 24, l: 44 };
+  const W = el.clientWidth || 480, H = 220, mg = { t: 34, r: 8, b: 24, l: 44 };
   const svg = d3.select(el).append("svg").attr("viewBox", `0 0 ${W} ${H}`);
   const x = d3.scaleTime(d3.extent(data, d => d.d), [mg.l, W - mg.r]);
   const y = d3.scaleLinear([0, d3.max(data, d => Math.max(d.m, d.v)) * 1.05], [H - mg.b, mg.t]).nice();
@@ -281,7 +281,7 @@ export function valSeries(el, meta) {
   svg.append("g").attr("transform", `translate(0,${H - mg.b})`).call(d3.axisBottom(x).ticks(5).tickSizeOuter(0));
   svg.append("g").attr("transform", `translate(${mg.l},0)`).call(d3.axisLeft(y).ticks(4).tickFormat(d3.format("~s")));
   svg.append("text").attr("x", mg.l).attr("y", 10).style("fill", "#ece8e1").text("National monthly active-fire cell-days · held-out years");
-  series.forEach(([, c, t], j) => { svg.append("rect").attr("x", W - 300 + j * 100).attr("y", 4).attr("width", 10).attr("height", 3).attr("fill", c); svg.append("text").attr("x", W - 286 + j * 100).attr("y", 9).text(t); });
+  series.forEach(([, c, t], j) => { svg.append("rect").attr("x", mg.l + j * 120).attr("y", 18).attr("width", 10).attr("height", 3).attr("fill", c); svg.append("text").attr("x", mg.l + 14 + j * 120).attr("y", 23).text(t); });
 }
 
 export function valScatter(el, meta) {
