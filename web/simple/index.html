@@ -182,15 +182,15 @@ function render(key) {
   const name = key === "nga" ? "Nigeria" : D.states.names[+key];
   const where = key === "nga" ? "Nigeria" : /Territory|State$/.test(name) ? name : `${name} State`;
   const h = seriesFor(key);
-  const clim = climatology(h, tl);
+  const clim = climatology(h, tl, [2003, 2024]);
   const crit = criticalPeriod(clim);
-  const ns = nowStatus(h, tl, crit);
+  const ns = nowStatus(h, tl, crit, [2003, 2025]);
   const L = LEVELS[ns.level];
-  // same 7-day window in each past year, 2003-2022
+  // same 7-day window in each past year, 2003-2025
   const wsum = (a, b) => { let t = 0; for (let i = Math.max(0, a); i <= b; i++) t += h[i]; return t; };
   const nowSum = wsum(ns.end - 6, ns.end), nd = tl.date(ns.end);
   const past = [];
-  for (let y = 2003; y <= 2022; y++) {
+  for (let y = 2003; y <= 2025; y++) {
     const j = tl.index(y, nd.getUTCMonth(), nd.getUTCDate());
     if (j - 6 >= 0 && j < tl.n) past.push({ y, less: wsum(j - 6, j) < nowSum });
   }
@@ -203,9 +203,9 @@ function render(key) {
   };
   const endDate = ng(tl.fmt(ns.end));
 
-  // monthly averages over 2003-2022
+  // monthly averages over 2003-2025
   const mt = monthlyTotals(h, tl);
-  const avg = MONTHS.map((_, m) => { let s = 0, c = 0; for (let y = 2003; y <= 2022; y++) { const v = mt.get((y - 2000) * 12 + m); if (v != null) { s += v; c++; } } return c ? s / c : 0; });
+  const avg = MONTHS.map((_, m) => { let s = 0, c = 0; for (let y = 2003; y <= 2025; y++) { const v = mt.get((y - 2000) * 12 + m); if (v != null) { s += v; c++; } } return c ? s / c : 0; });
   const mmax = Math.max(...avg) || 1;
   const hotMonth = m => avg[m] >= 0.35 * mmax;
   const top = avg.indexOf(mmax);
@@ -248,7 +248,7 @@ function render(key) {
     <div class="months" id="months">${avg.map((v, m) => `<div class="bar ${hotMonth(m) ? "hot" : ""}" style="height:0" data-h="${Math.max(3, 100 * v / mmax)}" title="${MONTHS[m]}"></div>`).join("")}</div>
     <div class="mlabels">${MONTHS.map((n, m) => m === top ? `<b>${n}</b>` : `<span>${n}</span>`).join("")}</div>
     <div class="legend"><span><i style="background:linear-gradient(180deg,var(--gold),var(--fire))"></i>Burning season</span><span><i style="background:var(--line)"></i>Rainy season / low burning</span></div>
-    <p class="small">Average burning in each month, 2003–2022. The taller the bar, the more burning.</p>
+    <p class="small">Average burning in each month, 2003–2025. The taller the bar, the more burning.</p>
   </section>
 
   <section class="card">
