@@ -307,7 +307,7 @@ function countUp(el, to, ms = 1600) {
 }
 function introStats() {
   const m = D.meta;
-  const items = [[m.totals.detections, "satellite fire detections"], [tl.year[tl.n - 1] - 2000, "years of record"], [4, "satellites harmonized"], [D.states.names.length, "states"]];
+  const items = [[m.totals.detections, "satellite fire detections"], [tl.year[tl.n - 1] - 2000, "years of record"], [4, "satellites harmonized"], [D.states.names.length - 1, "states + FCT"]];
   $("#introStats").innerHTML = items.map(([, t], j) => `<div style="animation-delay:${.15 * j}s"><b>0</b><span>${t}</span></div>`).join("");
   document.querySelectorAll("#introStats b").forEach((b, j) => countUp(b, items[j][0]));
 }
