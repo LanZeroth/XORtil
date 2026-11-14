@@ -30,8 +30,7 @@
   .wrap { max-width: 760px; margin: 0 auto; padding: 0 16px 40px; }
   header { padding: 28px 0 10px; text-align: center; }
   .logo { font-family: "Space Grotesk"; font-weight: 700; font-size: 34px; letter-spacing: .02em; display: inline-flex; align-items: center; gap: 10px; }
-  .logo .flame { font-size: 34px; animation: flick 2.4s ease-in-out infinite; display: inline-block; }
-  @keyframes flick { 50% { transform: scale(1.12) rotate(-4deg); } }
+  .logo .mark { width: 16px; height: 16px; border-radius: 50%; background: var(--fire); display: inline-block; }
   header p { color: var(--muted); font-size: 17px; margin: 6px 0 0; }
 
   .pick { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; margin: 18px 0; box-shadow: 0 6px 24px rgba(80,40,10,.06); }
@@ -54,6 +53,7 @@
 
   .status { border-width: 2px; }
   .status .badge { display: inline-flex; align-items: center; gap: 10px; font-family: "Space Grotesk"; font-weight: 700; font-size: 28px; padding: 10px 18px; border-radius: 16px; margin: 4px 0 12px; }
+  .status .badge::before { content: ""; width: 14px; height: 14px; border-radius: 50%; background: currentColor; flex: none; }
   .lvl-below .badge { background: var(--green-bg); color: var(--green); }
   .lvl-normal .badge { background: var(--yellow-bg); color: var(--yellow); }
   .lvl-above .badge { background: var(--orange-bg); color: var(--orange); }
@@ -84,7 +84,7 @@
 
   .tips { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
   .tip { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 14px; font-size: 16px; line-height: 1.45; }
-  .tip span { font-size: 26px; display: block; margin-bottom: 4px; }
+  .tip b { display: block; margin-bottom: 4px; }
 
   footer { text-align: center; color: var(--muted); font-size: 14px; line-height: 1.6; padding: 20px 0; }
   footer a { color: var(--fire); }
@@ -100,15 +100,15 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="logo"><span class="flame" aria-hidden="true">🔥</span>Harmattan</div>
-    <p>A simple fire check for Nigeria, from 25 years of NASA satellite pictures</p>
+    <div class="logo"><span class="mark" aria-hidden="true"></span>Harmattan</div>
+    <p>Fire activity in Nigeria, based on 25 years of NASA satellite records</p>
   </header>
 
   <section class="pick" aria-label="Choose your area">
     <label for="place">Where do you live?</label>
     <div class="pick-row">
       <select id="place"><option>Loading…</option></select>
-      <button class="btn" id="locate" type="button">📍 Use my location</button>
+      <button class="btn" id="locate" type="button">Use my location</button>
     </div>
     <p class="loc-msg" id="locMsg"></p>
   </section>
@@ -159,10 +159,10 @@ function seriesFor(key) {
 }
 
 const LEVELS = {
-  below:   { icon: "🟢", text: "Less fire than usual" },
-  normal:  { icon: "🟡", text: "About normal" },
-  above:   { icon: "🟠", text: "More fire than usual" },
-  extreme: { icon: "🔴", text: "Much more fire than usual" },
+  below:   { text: "Less fire than usual" },
+  normal:  { text: "About normal" },
+  above:   { text: "More fire than usual" },
+  extreme: { text: "Much more fire than usual" },
 };
 
 function render(key) {
@@ -197,15 +197,15 @@ function render(key) {
   const pts = D.recent.features.filter(f => !feat || inGeom(f.geometry.coordinates[0], f.geometry.coordinates[1], feat.geometry));
 
   const seasonLine = ns.inCrit
-    ? `🔥 <b>It is fire season now</b> in ${name}, until about <b>${fdoyLabel(crit.end)}</b>. Take extra care.`
-    : `📅 Fire season in ${name} starts in about <b>${ns.daysToCrit} days</b> (around <b>${fdoyLabel(crit.start)}</b>). Now is a good time to prepare.`;
+    ? `<b>Fire season is under way</b> in ${name} and usually lasts until about <b>${fdoyLabel(crit.end)}</b>.`
+    : `Fire season in ${name} usually starts in about <b>${ns.daysToCrit} days</b> (around <b>${fdoyLabel(crit.start)}</b>).`;
 
   $("#out").innerHTML = `
   <section class="card status lvl-${ns.level}" aria-live="polite">
     <p class="q"><span class="num">1</span> Is fire high right now?</p>
     <h2>This week in ${where}</h2>
-    <div class="badge">${L.icon} ${L.text}</div>
-    <p class="lead">In the past 7 days (up to ${endDate}), satellites saw <b>more fire than in ${of20} of the last 20 years</b> at this same time of year.</p>
+    <div class="badge">${L.text}</div>
+    <p class="lead">In the past 7 days (up to ${endDate}), satellites saw <b>more fire than in ${of20} of 20 past years</b> (2003–2022) at the same time of year.</p>
     <div class="dots" role="img" aria-label="${of20} out of 20 past years had less fire">${Array.from({ length: 20 }, (_, i) => `<i class="${i < of20 ? "on" : ""}"></i>`).join("")}</div>
     <p class="small">Each square is one past year (2003–2022). Orange squares are years that had <b>less</b> fire than this week.</p>
     <div class="season-alert">${seasonLine}</div>
@@ -237,12 +237,12 @@ function render(key) {
   </section>
 
   <section class="card">
-    <p class="q"><span class="num">5</span> What can I do?</p>
+    <p class="q"><span class="num">5</span> How to reduce the risk</p>
     <div class="tips">
-      <div class="tip"><span>🌾</span>Clear dry grass and leaves around homes, farms and stores before fire season.</div>
-      <div class="tip"><span>💨</span>Don't burn bush or rubbish on windy days. Harmattan wind spreads fire fast.</div>
-      <div class="tip"><span>🚧</span>Make firebreaks, which are strips of bare ground, around farms and villages.</div>
-      <div class="tip"><span>📞</span>See a fire spreading? Move away and call <b>112</b>.</div>
+      <div class="tip"><b>Clear dry vegetation</b>Remove dry grass and leaves around homes, farms and storage before the season starts.</div>
+      <div class="tip"><b>Avoid burning on windy days</b>The Harmattan wind can carry a small fire a long way in minutes.</div>
+      <div class="tip"><b>Make firebreaks</b>Strips of bare ground around farms and settlements stop fire from spreading.</div>
+      <div class="tip"><b>Report spreading fires</b>Move to a safe place and call the emergency number 112.</div>
     </div>
   </section>`;
 
@@ -299,7 +299,7 @@ function drawMap(feat, pts) {
       const { longitude: x, latitude: y } = p.coords;
       const f = D.geo.features.find(f => inGeom(x, y, f.geometry));
       if (!f) { msg.textContent = "You seem to be outside Nigeria. Showing all of Nigeria."; sel.value = "nga"; }
-      else { msg.textContent = `📍 You are in ${f.properties.name}.`; sel.value = String(f.id); }
+      else { msg.textContent = `Location found: ${f.properties.name}.`; sel.value = String(f.id); }
       sel.onchange();
     }, () => { msg.textContent = "Location was not shared. Please choose your state from the list."; }, { timeout: 10000 });
   };
